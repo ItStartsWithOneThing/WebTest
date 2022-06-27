@@ -25,6 +25,6 @@ namespace WebTest.Models
 
         [Required(ErrorMessage = "Field 'Version' is required")]
         [Range(0.0d, 100.0d)]
-        public double Vrsion { get; set; }
+        public double Version { get; set; }
     }
 }

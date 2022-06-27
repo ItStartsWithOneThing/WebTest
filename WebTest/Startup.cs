@@ -9,7 +9,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using WebTestBL;
+using WebTestBL.Profiles;
+using WebTestDAL;
 
 namespace WebTest
 {
@@ -25,6 +29,17 @@ namespace WebTest
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<BodyKitService>();
+
+            services.AddScoped<BodyKitRepository>();
+
+            var assemblies = new[]
+            {
+                Assembly.GetAssembly(typeof(BodyKitProfile))
+            };
+
+            services.AddAutoMapper(assemblies);
+
             services.AddControllers();
         }
 

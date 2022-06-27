@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebTest.Models;
+using WebTestBL;
 
 namespace WebTest.Controllers
 {
@@ -13,18 +14,15 @@ namespace WebTest.Controllers
     [Route("[controller]")]
     public class BodyKitController : ControllerBase
     {
-        private static List<BodyKit> _bodies;
 
+        private readonly BodyKitService _bodyKitService;
         private readonly ILogger<BodyKitController> _logger;
 
-        static BodyKitController()
-        {
-            _bodies = new List<BodyKit>();
-        }
 
-        public BodyKitController(ILogger<BodyKitController> logger)
+        public BodyKitController(ILogger<BodyKitController> logger, BodyKitService bodyKitService)
         {
             _logger = logger;
+            _bodyKitService = bodyKitService;
         }
 
         #region GET
@@ -32,13 +30,13 @@ namespace WebTest.Controllers
         [HttpGet("GetAll")]
         public IActionResult GetAllBodies()
         {
-            return Ok(_bodies);
+            return Ok(_bodyKitService.GetAll());
         }
 
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {
-            var body = _bodies.FirstOrDefault(x => x.Id == id);
+            var body = _bodyKitService.GetByID(id);
 
             if(body != null)
             {
@@ -51,21 +49,11 @@ namespace WebTest.Controllers
             return NotFound();
         }
 
-        [HttpGet("GetSecond")] // Get by GETSECOND name
-        public IActionResult GetSecond()
+        
+        [HttpGet("{FrontBumper}/{RearBumper}")]
+        public IActionResult GetBySeveralParams(string frontBumper, string rearBumper)
         {
-            if(_bodies.Count >= 2)
-            {
-                return Ok(_bodies[1]);
-            }
-
-            return NotFound();
-        }
-
-        [HttpGet("{id}/{FrontBumper}")]
-        public IActionResult GetByMultiple(Guid id, string frontBumper)
-        {
-            var kit = _bodies.FirstOrDefault(x => x.Id == id && x.FrontBumper == frontBumper);
+            var kit = _bodyKitService.GetBySeveralParams(frontBumper, rearBumper);
 
             if(kit != null)
             {
@@ -78,7 +66,7 @@ namespace WebTest.Controllers
         [HttpGet]
         public IActionResult GetByQuerry([FromQuery]string frontBumper, [FromQuery]string rearBumper)
         {
-            var kit = _bodies.FirstOrDefault(x => x.FrontBumper == frontBumper && x.RearBumper == rearBumper);
+            var kit = _bodyKitService.GetByQuerryString(frontBumper, rearBumper);
 
             if (kit != null)
             {
@@ -96,11 +84,9 @@ namespace WebTest.Controllers
         {
             if(kit != null)
             {
-                kit.Id = Guid.NewGuid();
+                var createdGuid = _bodyKitService.AddKit(kit);
 
-                _bodies.Add(kit);
-
-                return Created(kit.Id.ToString(), kit);
+                return Created(createdGuid.ToString(), kit);
             }
 
             return BadRequest();
@@ -109,19 +95,18 @@ namespace WebTest.Controllers
 
         #region DELETE
         [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
+        public IActionResult Remove(Guid id)
         {
             if(id != null)
             {
-                var target = _bodies.FirstOrDefault(x => x.Id == id);
+                var target = _bodyKitService.RemoveKit(id);
 
-                if(target != null)
+                if(target)
                 {
-                    _bodies.Remove(target);
                     return NoContent();
                 }
 
-                return BadRequest();
+                return NotFound();
             }
 
             return BadRequest();
@@ -137,13 +122,10 @@ namespace WebTest.Controllers
                 return BadRequest();
             }
 
-            var target = _bodies.FirstOrDefault(x => x.Id == kit.Id);
+            var target = _bodyKitService.UpdateKit(kit);
 
-            if(target != null)
+            if(target)
             {
-                var index = _bodies.IndexOf(target);
-                _bodies[index] = kit;
-
                 return Ok(kit);
             }
 
@@ -153,10 +135,9 @@ namespace WebTest.Controllers
 
         #region PATCH
         [HttpPatch("front")]
-        public IActionResult PartialUpdate([FromQuery] string rear, [FromQuery] string front)
+        public IActionResult UpdateRearBumper([FromQuery] Guid id, [FromQuery] string rearBumper)
         {
-            var target = _bodies.FirstOrDefault(x => x.RearBumper == rear);
-            target.FrontBumper = front;
+            var target = _bodyKitService.UpdateRearBumper(id, rearBumper);
 
             return Ok(target);
         }
