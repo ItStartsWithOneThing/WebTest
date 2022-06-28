@@ -57,6 +57,7 @@ namespace WebTest.Controllers
 
             if(kit != null)
             {
+                _logger.LogInformation($"Succesfull GET request by id-{id} and second parameter {rearBumper}"); // Existing for testing Fixup commits
                 return Ok(kit);
             }
 
