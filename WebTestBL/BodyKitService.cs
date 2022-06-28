@@ -59,7 +59,7 @@ namespace WebTestBL
             return result;
         }
 
-        public BodyKit GetByQuerryString(Guid id, string rear)
+        public BodyKit GetByQuerryString(Guid id, string rear) // Existing for instance
         {
             var dbBodyKit = _repository.GetBySeveralParams(id, rear);
 
