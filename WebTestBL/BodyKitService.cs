@@ -9,10 +9,10 @@ namespace WebTestBL
 {
     public class BodyKitService
     {
-        private BodyKitRepository _repository;
+        private IBodyKitRepository _repository;
         private IMapper _mapper;
 
-        public BodyKitService(IMapper mapper, BodyKitRepository repository)
+        public BodyKitService(IMapper mapper, IBodyKitRepository repository)
         {
             _mapper = mapper;
             _repository = repository;
@@ -29,7 +29,7 @@ namespace WebTestBL
                 return id;
             }
 
-            return Guid.Empty;
+            return Guid.NewGuid();
         }
 
         public IEnumerable<BodyKit> GetAll()
@@ -50,18 +50,18 @@ namespace WebTestBL
             return result;
         }
 
-        public BodyKit GetBySeveralParams(string front, string rear)
+        public BodyKit GetBySeveralParams(Guid id, string rear) // Existing for instance
         {
-            var dbBodyKit = _repository.GetBySeveralParams(front, rear);
+            var dbBodyKit = _repository.GetBySeveralParams(id, rear);
 
             var result = _mapper.Map<BodyKit>(dbBodyKit);
 
             return result;
         }
 
-        public BodyKit GetByQuerryString(string front, string rear)
+        public BodyKit GetByQuerryString(Guid id, string rear)
         {
-            var dbBodyKit = _repository.GetBySeveralParams(front, rear);
+            var dbBodyKit = _repository.GetBySeveralParams(id, rear);
 
             var result = _mapper.Map<BodyKit>(dbBodyKit);
 
@@ -80,13 +80,9 @@ namespace WebTestBL
             return _repository.Update(dbKit);
         }
 
-        public BodyKit UpdateRearBumper(Guid id, string newRearBumper)
+        public BodyKitDto UpdateRearBumper(Guid id, string newRearBumper)
         {
-            var dbBodykit = _repository.UpdateRearBumper(id, newRearBumper);
-
-            var result = _mapper.Map<BodyKit>(dbBodykit);
-
-            return result;
+            return _repository.UpdateRearBumper(id, newRearBumper);
         }
     }
 }

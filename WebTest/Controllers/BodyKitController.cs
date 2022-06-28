@@ -50,10 +50,10 @@ namespace WebTest.Controllers
         }
 
         
-        [HttpGet("{FrontBumper}/{RearBumper}")]
-        public IActionResult GetBySeveralParams(string frontBumper, string rearBumper)
+        [HttpGet("{id}/{RearBumper}")]
+        public IActionResult GetBySeveralParams(Guid id, string rearBumper) // Existing for instance
         {
-            var kit = _bodyKitService.GetBySeveralParams(frontBumper, rearBumper);
+            var kit = _bodyKitService.GetBySeveralParams(id, rearBumper);
 
             if(kit != null)
             {
@@ -64,9 +64,9 @@ namespace WebTest.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetByQuerry([FromQuery]string frontBumper, [FromQuery]string rearBumper)
+        public IActionResult GetByQuerry([FromQuery]Guid id, [FromQuery]string rearBumper) // Existing for instance
         {
-            var kit = _bodyKitService.GetByQuerryString(frontBumper, rearBumper);
+            var kit = _bodyKitService.GetByQuerryString(id, rearBumper);
 
             if (kit != null)
             {

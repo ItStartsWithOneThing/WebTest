@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using WebTestBL;
 using WebTestBL.Profiles;
 using WebTestDAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebTest
 {
@@ -31,7 +32,8 @@ namespace WebTest
         {
             services.AddScoped<BodyKitService>();
 
-            services.AddScoped<BodyKitRepository>();
+            services.AddScoped<IBodyKitRepository, BodyKitRepository>();
+
 
             var assemblies = new[]
             {
@@ -39,6 +41,9 @@ namespace WebTest
             };
 
             services.AddAutoMapper(assemblies);
+
+            services.AddDbContext<EFCoreContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
 
             services.AddControllers();
         }

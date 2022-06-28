@@ -1,52 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using WebTestDAL.Entities;
 
 namespace WebTestDAL
 {
-    public class BodyKitRepository
+    public class BodyKitRepository : IBodyKitRepository
     {
-        private static List<BodyKitDto> _bodies;
+        private readonly EFCoreContext _dbcontext;
 
-        static BodyKitRepository()
+        public BodyKitRepository(EFCoreContext dbContext)
         {
-            _bodies = new List<BodyKitDto>();
+            _dbcontext = dbContext;
         }
 
         public Guid Add(BodyKitDto kit)
         {
             kit.Id = Guid.NewGuid();
 
-            _bodies.Add(kit);
+            _dbcontext.BodyKits.Add(kit);
+
+            _dbcontext.SaveChanges();
 
             return kit.Id;
         }
 
         public IEnumerable<BodyKitDto> GetAll()
         {
-            return _bodies;    
+            return _dbcontext.BodyKits.ToList();
         }
 
         public BodyKitDto GetById(Guid id)
         {
-            return _bodies.FirstOrDefault(x => x.Id == id);
+            return _dbcontext.BodyKits.Where(x => x.Id == id).FirstOrDefault();
         }
 
-        public BodyKitDto GetBySeveralParams(string front, string rear)
+        public BodyKitDto GetBySeveralParams(Guid id, string rear) // Existing for instance
         {
-            var dbBodyKit = _bodies.FirstOrDefault(x => x.FrontBumper == front && x.RearBumper == rear);
-
-            return dbBodyKit;
+            return _dbcontext.BodyKits.Where(x => x.Id == id && x.RearBumper == rear).FirstOrDefault();
         }
 
         public bool Remove(Guid id)
         {
-            var target = _bodies.FirstOrDefault(x => x.Id == id);
+            var dbKit = GetById(id);
 
-            if(target != null)
+            if(dbKit != null)
             {
-                _bodies.Remove(target);
+                _dbcontext.Remove(dbKit);
+
+                _dbcontext.SaveChanges();
 
                 return true;
             }
@@ -56,30 +59,24 @@ namespace WebTestDAL
 
         public bool Update(BodyKitDto newKit)
         {
-            var dbKit = GetById(newKit.Id);
+            _dbcontext.BodyKits.Update(newKit);
 
-            if(dbKit != null)
-            {
-                var index = _bodies.IndexOf(dbKit);
+            var result = _dbcontext.SaveChanges();
 
-                _bodies[index] = newKit;
-            }
-
-            return dbKit != null;
+            return result != 0;
         }
 
         public BodyKitDto UpdateRearBumper(Guid id, string newRearBumper)
         {
-            var result = _bodies.FirstOrDefault(x => x.Id == id);
+            var dbKit = GetById(id);
 
-            if(result != null)
-            {
-                result.RearBumper = newRearBumper;
+            dbKit.RearBumper = newRearBumper;
 
-                return result;
-            }    
+            _dbcontext.BodyKits.Update(dbKit);
 
-            return null;
+            _dbcontext.SaveChanges();
+
+            return dbKit;
         }
     }
 }
